@@ -1,7 +1,9 @@
 mod assembler;
 
 use std::env;
-use std::path::PathBuf;
+
+pub const IO_ERROR: i32 = 1;
+pub const COMPILE_ERROR: i32 = 2;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -11,7 +13,7 @@ fn main() {
     }
 
     let command = args[1].to_owned();
-    let file_name = PathBuf::from(args[2].to_owned());
+    let file_name = args[2].to_owned();
     match command.as_str() {
         "assemble" => {
             assembler::run(file_name);
