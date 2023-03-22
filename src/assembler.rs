@@ -18,14 +18,16 @@ struct Label {
 
 pub fn run(path: String) {
     let mut file = fs::read_to_string(path.to_owned()).expect("Failed to read file");
-    let labels = parse_labels(file.to_owned());
+    
     file = expand_macros(file, path.to_owned());
-    println!("{file}");
+    let labels = parse_labels(file.to_owned());
+
+    let object = assemble(file);
 
     let mut file_path = PathBuf::from(path);
     file_path.set_extension("o");
 
-    fs::write(file_path, file).expect("Unable to write to output file");
+    fs::write(file_path, object).expect("Unable to write to output file");
 }
 
 fn parse_labels(file: String) -> Vec<Label> {
@@ -233,4 +235,33 @@ fn expand_macros(file: String, path: String) -> String {
     }
 
     expanded
+}
+
+fn assemble(assembly: String) -> Vec<u8> {
+    let bytes: Vec<u8> = vec![0x04, 0, 0x00, 240, 0x26, 0, 0x00, 0x00];
+
+    for line in assembly.lines() {
+
+    }
+
+    bytes
+}
+
+/// Parses an integer literal from a string.
+/// 
+/// Accepts hexidecimal, octal, and binary strings as well as regular decimal strings.
+/// 
+/// Hex literals should be prefixed by `0x`,
+/// Octal literals should be prefixed by `0o`, and
+/// Binary literals should be prefixed by `0b`.
+fn parse_literal(s: String) -> Result<u16, <u16 as std::str::FromStr>::Err> {
+    if s.starts_with("0x") {
+        u16::from_str_radix(&s[2..], 16)
+    } else if s.starts_with("0o") {
+        u16::from_str_radix(&s[2..], 8)
+    } else if s.starts_with("0b") {
+        u16::from_str_radix(&s[2..], 2)
+    } else {
+        s.parse()
+    }
 }
